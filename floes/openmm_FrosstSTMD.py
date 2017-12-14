@@ -7,12 +7,12 @@ from LigPrepCubes.ports import LigandReader
 from LigPrepCubes.cubes import LigChargeCube
 
 
-job = WorkFloe('Short Traj MD Protocol')
+job = WorkFloe('Merck Frosst MD Protocol')
 
 job.description = """
 Set up an OpenMM complex then minimize, warm up and equilibrate a system by using three equilibration stages
 
-Ex: python floes/openmm_MDprep.py --ligands ligands.oeb --protein protein.oeb --ofs-data_out prep.oeb
+Ex: python floes/openmm_FrosstSTMD.py --ligands ligands.oeb --protein protein.oeb --ofs-data_out prep.oeb
 
 Parameters:
 -----------
@@ -45,7 +45,7 @@ iprot = ProteinReader("ProteinReader")
 iprot.promote_parameter("data_in", promoted_name="protein", title='Protein Input File',
                         description="Protein file name")
 iprot.promote_parameter("protein_prefix", promoted_name="protein_prefix",
-                        default='PRT', description="Protein prefix")
+                        default='prot', description="Protein prefix")
 
 # Complex cube used to assemble the ligands and the solvated protein
 complx = ComplexPrep("Complex")
@@ -79,7 +79,7 @@ minComplex.promote_parameter('restraints', promoted_name='m_restraints', default
                              description='Select mask to apply restarints')
 minComplex.promote_parameter('restraintWt', promoted_name='m_restraintWt', default=5.0,
                              description='Restraint weight')
-minComplex.promote_parameter('steps', promoted_name='steps', default=20000)
+minComplex.promote_parameter('steps', promoted_name='steps', default=1000)
 minComplex.promote_parameter('center', promoted_name='center', default=True)
 
 # Output the minimized systems
@@ -89,7 +89,7 @@ minimization_ofs.set_parameters(data_out=iprot.promoted_parameters['protein_pref
 
 # NVT simulation. Here the assembled system is warmed up to the final selected temperature
 warmup = OpenMMnvtCube('warmup', title='warmup')
-warmup.promote_parameter('time', promoted_name='warm_psec', default=100.0,
+warmup.promote_parameter('time', promoted_name='warm_psec', default=10.0,
                          description='Length of MD run in picoseconds')
 warmup.promote_parameter('restraints', promoted_name='w_restraints', default="noh (ligand or protein)",
                          description='Select mask to apply restarints')
@@ -108,7 +108,7 @@ warmup.promote_parameter('outfname', promoted_name='w_outfname', default='warmup
 
 # NPT Equilibration stage 1
 equil1 = OpenMMnptCube('equil1', title='equil1')
-equil1.promote_parameter('time', promoted_name='eq1_psec', default=100.0,
+equil1.promote_parameter('time', promoted_name='eq1_psec', default=10.0,
                          description='Length of MD run in picoseconds')
 equil1.promote_parameter('restraints', promoted_name='eq1_restraints', default="noh (ligand or protein)",
                          description='Select mask to apply restarints')
@@ -122,7 +122,7 @@ equil1.promote_parameter('outfname', promoted_name='eq1_outfname', default='equi
 
 # NPT Equilibration stage 2
 equil2 = OpenMMnptCube('equil2', title='equil2')
-equil2.promote_parameter('time', promoted_name='eq2_psec', default=100.0,
+equil2.promote_parameter('time', promoted_name='eq2_psec', default=20.0,
                          description='Length of MD run in picoseconds')
 equil2.promote_parameter('restraints', promoted_name='eq2_restraints', default="noh (ligand or protein)",
                          description='Select mask to apply restarints')
@@ -137,7 +137,7 @@ equil2.promote_parameter('outfname', promoted_name='eq2_outfname', default='equi
 
 # NPT Equilibration stage 3
 equil3 = OpenMMnptCube('equil3', title='equil3')
-equil3.promote_parameter('time', promoted_name='eq3_psec', default=200.0,
+equil3.promote_parameter('time', promoted_name='eq3_psec', default=60.0,
                          description='Length of MD run in picoseconds')
 equil3.promote_parameter('restraints', promoted_name='eq3_restraints', default="ca_protein or (noh ligand)",
                          description='Select mask to apply restarints')
